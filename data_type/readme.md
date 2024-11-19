@@ -4,10 +4,10 @@ Geospatial data allows the communication of information in a wide range of field
 
 1) [Raster formats](./raster_formats.ipynb)
 2) [Vector formats](./vector_data_formats.ipynb)
-3) Data cube formats (or multi-dimensional raster)
+3) [Data cube formats](./datacube_formats.ipynb)
 4) Cloud-optimized formats
 
- For each of these tutorials, sample data will be used, which you can visualize using QGIS.
+For each of these tutorials, sample data will be used, which you can visualize using QGIS.
  
 To run a notebook, first create a virtual environment and install the required packages (if not already done) 
 
@@ -16,4 +16,4 @@ python3.11 -m venv venv
 pip install -r requirements.txt
 ```
 
-Then you can simply use `jupyter notebook xxx.ipynb` to run the corresponding noteboook.
+Then you can simply use `jupyter notebook xxx.ipynb` to run the corresponding notebook.
