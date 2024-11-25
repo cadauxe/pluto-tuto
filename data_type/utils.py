@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 import h5py
+import holoviews
 import numpy as np
 import pandas as pd
 import rasterio
@@ -22,7 +23,29 @@ def get_file_size_in_mb(file_path):
     return raw_size * 1e-6
 
 
-def compare_read_write_times(read_times, write_times, labels):
+def compare_read_write_times(
+        read_times: list[str],
+        write_times: list[str],
+        labels: list[str]
+) -> holoviews.element.chart.Bars:
+    """
+    Given a list of reading and a list of write time and corresponding labels (i.e. formats)
+    show a bar plot comparing the different times
+
+    Parameters
+    ----------
+    read_times:
+        List of reading times
+    write_times:
+        List of writing times
+    labels:
+        Labels to use
+
+    Returns
+    -------
+    plot:
+        The plot created by hvplot
+    """
     data = pd.DataFrame({
         'Formats': labels,
         'Read': read_times,
@@ -43,7 +66,20 @@ def compare_read_write_times(read_times, write_times, labels):
     return plot
 
 
-def download_sample_data(download_dir):
+def download_sample_data(download_dir: str | Path):
+    """
+    Download a .zip containing multiple rasters and only keep one, in the provided directory.
+
+    Parameters
+    ----------
+    download_dir:
+        Directory to store the downloaded data
+
+    Returns
+    -------
+    output_raster:
+        The path to the downloaded raster
+    """
     output_raster = Path(
         download_dir) / "data" / "xt_SENTINEL2B_20180621-111349-432_L2A_T30TWT_D_V1-8_RVBPIR.tif"
 
@@ -87,7 +123,20 @@ def show_raster(input_image: str):
         show(rescaled_array.astype(np.uint8), title="Raster Data")
 
 
-def rescale_raster(raster_data):
+def rescale_raster(raster_data: np.ndarray):
+    """
+    Rescale and normalize a raster for visualization
+
+    Parameters
+    ----------
+    raster_data:
+        Numpy array containing the raster data
+
+    Returns
+    -------
+    rescaled_array:
+        The processed array ready for visualization
+    """
     flat_array = raster_data.flatten()
     lower_bound = np.quantile(flat_array, 0.001)
     upper_bound = np.quantile(flat_array, 0.999)
@@ -100,7 +149,20 @@ def rescale_raster(raster_data):
     return rescaled_array
 
 
-def download_sample_vector_data(download_dir):
+def download_sample_vector_data(download_dir: str | Path):
+    """
+    Download an example shapefile and store it in the provided directory
+
+    Parameters
+    ----------
+    download_dir:
+        Path to the directory where to store the shapefile
+
+    Returns
+    -------
+    output_file:
+        Absolute path to the downloaded shapefile
+    """
     data_dir = Path(download_dir) / "departement-31"
     output_file = data_dir / "landuse.shp"
     if output_file.exists():
@@ -119,26 +181,35 @@ def download_sample_vector_data(download_dir):
     return output_file.resolve()
 
 
-def generate_hdf5_file(output_file, raster_file):
+def generate_hdf5_file(output_file: str | Path, raster_file: str | Path):
+    """
+    Use a raster to create a hdf5 file
+
+    Parameters
+    ----------
+    output_file:
+        Path to the generated hdf5 file
+    raster_file
+        Path to the raster used to create the file. Download a raster if it doesn't exist.
+
+    Returns
+    -------
+
+    """
     # assumes raster with 3 bands
     output_file = Path(output_file)
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    if not Path(raster_file).exists():
+    if not raster_file or not Path(raster_file).exists():
         download_sample_data(output_file.parent)
 
-    if raster_file:
-        with rasterio.open(raster_file, "r") as src:
-            image_data = src.read()
-            data_2d = image_data[0]  # 1st raster band
-            data_3d = image_data  # all raster bands
-            desc_2d = "1st band from a raster"
-            desc_3d = "RGB bands from a raster"
-    else:
-        data_2d = np.random.rand(10, 10)  # 10x10 random array
-        data_3d = np.random.rand(5, 10, 10)  # 5x10x10 random array
-        desc_2d = "Random 2D data"
-        desc_3d = "Random 3D data"
+    with rasterio.open(raster_file, "r") as src:
+        image_data = src.read()
+        data_2d = image_data[0]  # 1st raster band
+        data_3d = image_data  # all raster bands
+        desc_2d = "1st band from a raster"
+        desc_3d = "RGB bands from a raster"
+
 
     with h5py.File(output_file, 'w') as f:
         # Main group
@@ -162,7 +233,20 @@ def generate_hdf5_file(output_file, raster_file):
         group.attrs["project"] = "Tutorial example project"
 
 
-def download_netcdf(download_dir):
+def download_netcdf(download_dir: str | Path):
+    """
+    Download an example netcdf file and store it in the provided directory
+
+    Parameters
+    ----------
+    download_dir:
+        Path to the directory where to store the netcdf
+
+    Returns
+    -------
+    output_file:
+        Absolute path to the downloaded .nc file
+    """
     output_file = Path(download_dir) / "precip.mon.total.v7.nc"
     if output_file.exists():
         return output_file
@@ -178,10 +262,24 @@ def download_netcdf(download_dir):
 
 def compare_datacube_formats(comparison_directory, random_shape=None):
     """
-    compare hdf5, netcdf and zarr files: create a random array of size (10, 1000, 1000) and for each format:
+    Compare hdf5, netcdf and zarr files: create a random array of size (10, 1000, 1000) and for
+    each format:
     1) measure the write time
     2) measure file size
     3) measure the read time
+
+    The results are then printed.
+
+    Parameters
+    ----------
+    comparison_directory:
+        Path to store the test data, used for the comparisons
+    random_shape
+        Shape of the random array to use
+
+    Returns
+    -------
+    None
     """
     if not random_shape:
         random_shape = (100, 1000, 1000)
@@ -191,7 +289,7 @@ def compare_datacube_formats(comparison_directory, random_shape=None):
     # HDF5
     # write
     h5_start_write = time.time()
-    h5_file = Path(comparison_directory)/"h5_file.h5"
+    h5_file = Path(comparison_directory) / "h5_file.h5"
     with h5py.File(h5_file, 'w') as f:
         f.create_dataset('array', data=data)
     h5_write_time = time.time() - h5_start_write
@@ -208,7 +306,7 @@ def compare_datacube_formats(comparison_directory, random_shape=None):
     # NetCDF
     # write
     nc_start_read = time.time()
-    nc_file = Path(comparison_directory)/"nc_file.nc"
+    nc_file = Path(comparison_directory) / "nc_file.nc"
     ds = xr.DataArray(data, dims=["time", "x", "y"])
     ds.to_netcdf(nc_file)
     nc_write_time = time.time() - nc_start_read
@@ -225,7 +323,7 @@ def compare_datacube_formats(comparison_directory, random_shape=None):
     # Zarr
     # write
     zarr_start = time.time()
-    zarr_file = str(Path(comparison_directory)/"zarr_file.zarr")
+    zarr_file = str(Path(comparison_directory) / "zarr_file.zarr")
     zarr.save(zarr_file, data)
     zarr_write_time = time.time() - zarr_start
 
