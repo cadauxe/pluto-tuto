@@ -116,7 +116,7 @@ def download_sample_vector_data(download_dir):
             file_name.unlink()
 
     assert output_file.exists()
-    return output_file
+    return output_file.resolve()
 
 
 def generate_hdf5_file(output_file, raster_file):
