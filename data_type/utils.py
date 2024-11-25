@@ -122,6 +122,7 @@ def download_sample_vector_data(download_dir):
 def generate_hdf5_file(output_file, raster_file):
     # assumes raster with 3 bands
     output_file = Path(output_file)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
 
     if not Path(raster_file).exists():
         download_sample_data(output_file.parent)
@@ -131,7 +132,7 @@ def generate_hdf5_file(output_file, raster_file):
             image_data = src.read()
             data_2d = image_data[0]  # 1st raster band
             data_3d = image_data  # all raster bands
-            desc_2d = "st band from a raster"
+            desc_2d = "1st band from a raster"
             desc_3d = "RGB bands from a raster"
     else:
         data_2d = np.random.rand(10, 10)  # 10x10 random array
