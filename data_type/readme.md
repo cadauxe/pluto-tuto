@@ -9,12 +9,11 @@ which contexts to use them most effectively. It will be divided into four jupyte
 2) [Vector formats](./vector_data_formats.ipynb)
 3) [Data cube formats](./datacube_formats.ipynb)
 4) [Point clouds](./point_clouds.ipynb)
+5) [Data optimization](./data_optimization.ipynb)
 
-For each tutorial, sample data will either:
+For each tutorial, sample data will be provided in the `sample_data` directory or automatically
+downloaded (in the `sample_data` directory by default)
 
-- be directly provided (from the `sample_data` directory)
-- be automatically downloaded (in the `sample_data` by default)
-- have to be downloaded by the user (links and instructions will be provided)
 
 To run a notebook, first create a virtual environment using pip. Then, install the required 
 packages (if not already done), using the `requirements.txt` file.
