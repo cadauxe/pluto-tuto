@@ -19,8 +19,9 @@ To run a notebook, first create a virtual environment using pip. Then, install t
 packages (if not already done), using the `requirements.txt` file.
 
 ```bash
-python3.11 -m venv venv
+python -m venv venv
 pip install -r requirements.txt
+source venv/bin/activate
 ```
 
 Then you can simply use `jupyter notebook xxx.ipynb` to run the corresponding notebook.
